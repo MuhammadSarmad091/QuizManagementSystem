@@ -1,0 +1,25 @@
+.tab {
+    -fx-background-color: #2E86C1; /* Tab background */
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+}
+
+.tab .tab-label {
+    -fx-text-fill: white; /* Change text color */
+}
+
+.tab:selected {
+    -fx-background-color: #1B4F72; /* Darker shade for selected tab */
+}
+
+.tab-pane {
+    -fx-background-color: #f4f4f4; /* Light background */
+    -fx-tab-min-height: 45px;
+    -fx-tab-max-height: 45px;
+	-fx-tab-max-width: 150px;
+	-fx-tab-min-width: 100px;
+	
+}
+.tab-pane > .tab-header-area {
+    -fx-background-color: #2C3E50; /* Dark header */
+}
