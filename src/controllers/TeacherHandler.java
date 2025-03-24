@@ -138,4 +138,13 @@ public class TeacherHandler {
     	return classDBH.getDBH().addTeacherInClass(teacherID, classCode);
     }
     
+    public List<Student> getStudentsInTheClass(String classCode)
+    {
+    	return classDBH.getDBH().getStudentsInTheClass(classCode);
+    }
+    
+    public List<Teacher> getTeachersInTheClass(String classCode)
+    {
+    	return classDBH.getDBH().getTeachersInTheClass(classCode);
+    }
 }

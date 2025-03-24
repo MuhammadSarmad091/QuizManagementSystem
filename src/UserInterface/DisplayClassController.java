@@ -2,8 +2,8 @@ package UserInterface;
 
 import controllers.TeacherHandler;
 import java.io.IOException;
-import java.util.List;
-import businessLayer.Class;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -13,17 +13,8 @@ import javafx.scene.control.TabPane;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.ColumnConstraints;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 
 public class DisplayClassController {
@@ -33,10 +24,23 @@ public class DisplayClassController {
     // This method now accepts teacherHandler
     public void initData(TeacherHandler handler) {
         this.teacherHandler = handler;
-        loadTabPane();
+        // Set up the listener for tab selection changes
+        TabPane_Sec.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Tab>() {
+            @Override
+            public void changed(ObservableValue<? extends Tab> obs, Tab oldTab, Tab newTab) {
+                if (newTab != null) {
+                    loadFXMLForTab(newTab);
+                }
+            }
+        });
+        // Load default tab content (if any)
+        Tab defaultTab = TabPane_Sec.getSelectionModel().getSelectedItem();
+        if (defaultTab != null) {
+            loadFXMLForTab(defaultTab);
+        }
     }
 
-    // Existing initialize method to set class info and load tabs.
+    // Existing initialize method to set class info.
     public void initialize(String ClassName, String ClassCode) {
         classname.setText(ClassName);
         classcode.setText(ClassCode);
@@ -57,15 +61,7 @@ public class DisplayClassController {
     @FXML
     private Button remove_class;
     
-    // When a tab is selected, load the corresponding FXML.
-    private void loadTabPane() {
-        Tab selectedTab = TabPane_Sec.getSelectionModel().getSelectedItem();
-        if (selectedTab != null) {
-            loadFXMLForTab(selectedTab);
-        }
-    }
-
-    
+    // Modified loadFXMLForTab: loads the corresponding FXML and passes teacherHandler to the tab controller.
     private void loadFXMLForTab(Tab tab) {
         String tabTitle = tab.getText(); // Get the tab's title
         String fxmlFile = "";
@@ -86,17 +82,21 @@ public class DisplayClassController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlFile));
             Parent newContent = loader.load();
             
-            // Pass teacherHandler to the tab controller if applicable
             Object controller = loader.getController();
             if (controller instanceof QuizesTabController) {
                 ((QuizesTabController) controller).initData(teacherHandler);
+                System.out.println("Loaded QuizesTabController with teacherHandler: " + teacherHandler);
+            } else if (controller instanceof StudentsTabController) {
+                ((StudentsTabController) controller).setTeacherHandler(teacherHandler);
+            } else if (controller instanceof TeachersTabController) {
+                ((TeachersTabController) controller).setTeacherHandler(teacherHandler);
             }
-            // Similarly, if you have controllers for Students and Teachers tabs, call initData(handler) on them.
             
-            StackPane wrapper = new StackPane();
-            wrapper.getChildren().add(newContent);
-            wrapper.prefWidthProperty().bind(TabPane_Sec.widthProperty());
-            wrapper.prefHeightProperty().bind(TabPane_Sec.heightProperty());
+            AnchorPane wrapper = new AnchorPane(newContent);
+            AnchorPane.setTopAnchor(newContent, 0.0);
+            AnchorPane.setBottomAnchor(newContent, 0.0);
+            AnchorPane.setLeftAnchor(newContent, 0.0);
+            AnchorPane.setRightAnchor(newContent, 0.0);
             tab.setContent(wrapper);
         } catch (IOException e) {
             e.printStackTrace();
@@ -104,39 +104,30 @@ public class DisplayClassController {
     }
     
     @FXML
-    void handle_Add_teacher(MouseEvent event) 
-    {
-    	
-    	try {
-	        // Load the FXML file 
-			FXMLLoader loader = new FXMLLoader(getClass().getResource("/UserInterface/AddTeacherCLass.fxml"));
-	        Parent root = loader.load();
+    void handle_Add_teacher(MouseEvent event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/UserInterface/AddTeacherCLass.fxml"));
+            Parent root = loader.load();
 
-	        // Get controller instance
-	        AddTeacherClassController controller = loader.getController();
-	        
-	        // Pass student data to initialize
-	        if (controller != null) {
-	            
-				controller.initialize();
-	        }
+            // Get controller instance
+            AddTeacherClassController controller = loader.getController();
+            if (controller != null) {
+                controller.initialize();
+            }
 
-	        // Create new stage
-	        Stage stage = new Stage();
-	        stage.setTitle("Check Objective Submission");
-	        stage.setScene(new Scene(root));
-	        stage.show();
+            // Create new stage
+            Stage stage = new Stage();
+            stage.setTitle("Check Objective Submission");
+            stage.setScene(new Scene(root));
+            stage.show();
 
-	    } catch (IOException e) {
-	        e.printStackTrace();
-	    }
-    	
-
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @FXML
     void handle_remove_class(MouseEvent event) {
-
+        // Implementation for removal if needed.
     }
-
 }

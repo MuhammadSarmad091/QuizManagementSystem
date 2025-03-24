@@ -12,13 +12,13 @@
    <center>
       <AnchorPane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
          <children>
-            <TableView fx:id="lst_Teachers" layoutX="175.0" layoutY="93.0" prefHeight="442.0" prefWidth="924.0">
+            <TableView fx:id="lst_Teachers" layoutX="175.0" layoutY="93.0" prefHeight="379.0" prefWidth="924.0">
               <columns>
-                <TableColumn prefWidth="75.0" text="C1" />
-                <TableColumn prefWidth="75.0" text="C2" />
+                <TableColumn fx:id="username_t" prefWidth="462.4000549316406" text="Username" />
+                <TableColumn fx:id="name_t" prefWidth="461.6000061035156" text="Name" />
               </columns>
             </TableView>
-            <Button fx:id="RemoveTeacher" layoutX="552.0" layoutY="564.0" mnemonicParsing="false" onMouseClicked="#handle_RemoveTeacher" prefHeight="37.0" prefWidth="179.0" style="-fx-background-color: green;" text="Remove Teacher" textFill="WHITE">
+            <Button fx:id="RemoveTeacher" layoutX="547.0" layoutY="481.0" mnemonicParsing="false" onMouseClicked="#handle_RemoveTeacher" prefHeight="37.0" prefWidth="179.0" style="-fx-background-color: green;" text="Remove Teacher" textFill="WHITE">
                <font>
                   <Font name="Arial Bold" size="16.0" />
                </font>

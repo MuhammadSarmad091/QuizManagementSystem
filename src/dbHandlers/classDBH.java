@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Random;
 
 import businessLayer.Class;
+import businessLayer.Student;
+import businessLayer.Teacher;
 public class classDBH {
     private static classDBH instance;
     private DBManager dbManager;
@@ -140,5 +142,61 @@ public class classDBH {
             }
         }
     }
+    
+    public List<Student> getStudentsInTheClass(String classCode) {
+        List<Student> students = new ArrayList<>();
+        Connection conn = null;
+        try {
+            conn = dbManager.connect();
+            String sql = "SELECT studentUserName, name FROM ClassStudent cs INNER JOIN Userr u ON cs.studentUserName = u.username WHERE cs.classCode = ?";
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setString(1, classCode);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                String username = rs.getString("studentUserName");
+                String name = rs.getString("name");
+                Student s = new Student(username, "", "student", name);
+                students.add(s);
+            }
+            rs.close();
+            ps.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            if (conn != null) {
+                try { conn.close(); } catch (SQLException e) { e.printStackTrace(); }
+            }
+        }
+        return students;
+    }
+    
+    public List<Teacher> getTeachersInTheClass(String classCode) {
+        List<Teacher> teachers = new ArrayList<>();
+        Connection conn = null;
+        try {
+            conn = dbManager.connect();
+            String sql = "SELECT teacherUserName, name FROM ClassTeacher ct INNER JOIN Userr u ON ct.teacherUserName = u.username WHERE ct.classCode = ?";
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setString(1, classCode);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                String username = rs.getString("teacherUserName");
+                String name = rs.getString("name");
+                Teacher t = new Teacher(username, "", "teacher", name);
+                teachers.add(t);
+            }
+            rs.close();
+            ps.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            if (conn != null) {
+                try { conn.close(); } catch (SQLException e) { e.printStackTrace(); }
+            }
+        }
+        return teachers;
+    }
+
+    
     
 }
