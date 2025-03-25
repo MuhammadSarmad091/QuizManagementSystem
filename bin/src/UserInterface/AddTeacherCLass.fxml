@@ -9,6 +9,7 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.text.Font?>
 
+
 <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800.0" prefWidth="1280.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="UserInterface.AddTeacherClassController">
    <top>
       <AnchorPane prefHeight="804.0" prefWidth="1280.0" BorderPane.alignment="CENTER">
@@ -20,8 +21,8 @@
             </Label>
             <TableView fx:id="List_Teachers" layoutX="160.2" layoutY="171.2" prefHeight="436.0" prefWidth="1018.0" AnchorPane.bottomAnchor="192.80000000000007" AnchorPane.leftAnchor="160.2" AnchorPane.rightAnchor="101.40000000000009" AnchorPane.topAnchor="171.2">
               <columns>
-                <TableColumn fx:id="username_t" prefWidth="508.00001525878906" text="Username" />
-                <TableColumn fx:id="name_t" prefWidth="509.5998840332031" text="Name" />
+                <TableColumn prefWidth="75.0" text="C1" />
+                <TableColumn prefWidth="75.0" text="C2" />
               </columns>
             </TableView>
             <Label layoutX="420.2" layoutY="116.0" prefHeight="32.0" prefWidth="157.0" text="Teacher UserName:" AnchorPane.bottomAnchor="652.0" AnchorPane.leftAnchor="420.2" AnchorPane.rightAnchor="702.2" AnchorPane.topAnchor="116.0">

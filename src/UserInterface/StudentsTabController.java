@@ -5,6 +5,8 @@ import businessLayer.Student;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -35,7 +37,39 @@ public class StudentsTabController {
 
     @FXML
     void handle_RemoveStudent(MouseEvent event) {
-        // Implement removal logic if needed.
+        // Get the selected student from the table view.
+        Student selectedStudent = lst_Students.getSelectionModel().getSelectedItem();
+        if (selectedStudent == null) {
+            Alert alert = new Alert(AlertType.WARNING);
+            alert.setTitle("No Selection");
+            alert.setHeaderText("No Student Selected");
+            alert.setContentText("Please select a student to remove.");
+            alert.showAndWait();
+            return;
+        }
+
+        // Get the class code from the current class in teacherHandler.
+        String classCode = teacherHandler.getCurrentClass().getClassCode();
+        
+        // Attempt to remove the student using teacherHandler.
+        boolean removed = teacherHandler.removeStudentFromClass(classCode, selectedStudent.getUsername());
+        
+        if (removed) {
+            // If removal is successful, update the TableView.
+            lst_Students.getItems().remove(selectedStudent);
+            Alert alert = new Alert(AlertType.INFORMATION);
+            alert.setTitle("Removal Successful");
+            alert.setHeaderText(null);
+            alert.setContentText("Student removed successfully.");
+            alert.showAndWait();
+        } else {
+            // Notify the user of the failure.
+            Alert alert = new Alert(AlertType.ERROR);
+            alert.setTitle("Removal Failed");
+            alert.setHeaderText(null);
+            alert.setContentText("Failed to remove the student.");
+            alert.showAndWait();
+        }
     }
     
     private void loadStudents() {

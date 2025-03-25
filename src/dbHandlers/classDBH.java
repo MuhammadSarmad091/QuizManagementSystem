@@ -197,6 +197,86 @@ public class classDBH {
         return teachers;
     }
 
-    
+    public boolean removeStudentFromClass(String classCode, String studentUsername) {
+        Connection conn = null;
+        try {
+            conn = dbManager.connect();
+            conn.setAutoCommit(false);
+
+            // 1. Delete Answers associated with the student's submissions in quizzes for this class.
+            String sqlDeleteAnswers =
+                "DELETE FROM Answer " +
+                "WHERE submissionNo IN (" +
+                "    SELECT s.submissionNo " +
+                "    FROM Submission s " +
+                "    JOIN Quiz q ON s.quizNo = q.quizNo " +
+                "    WHERE q.classCode = ? AND s.studentUserName = ?" +
+                ")";
+            try (PreparedStatement ps = conn.prepareStatement(sqlDeleteAnswers)) {
+                ps.setString(1, classCode);
+                ps.setString(2, studentUsername);
+                ps.executeUpdate();
+            }
+
+            // 2. Delete Submissions for the student in quizzes for this class.
+            String sqlDeleteSubmissions =
+                "DELETE FROM Submission " +
+                "WHERE studentUserName = ? " +
+                "  AND quizNo IN (SELECT quizNo FROM Quiz WHERE classCode = ?)";
+            try (PreparedStatement ps = conn.prepareStatement(sqlDeleteSubmissions)) {
+                ps.setString(1, studentUsername);
+                ps.setString(2, classCode);
+                ps.executeUpdate();
+            }
+
+            // 3. Remove the student from the ClassStudent table.
+            String sqlDeleteClassStudent =
+                "DELETE FROM ClassStudent " +
+                "WHERE classCode = ? AND studentUserName = ?";
+            try (PreparedStatement ps = conn.prepareStatement(sqlDeleteClassStudent)) {
+                ps.setString(1, classCode);
+                ps.setString(2, studentUsername);
+                ps.executeUpdate();
+            }
+
+            conn.commit();
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
+            return false;
+        } finally {
+            if (conn != null) {
+                try {
+                    // Reset auto-commit before closing the connection.
+                    conn.setAutoCommit(true);
+                    conn.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    public boolean removeTeacherFromClass(String classCode, String teacherUsername) {
+        try (Connection conn = dbManager.connect()) {
+            String sql = "DELETE FROM ClassTeacher WHERE classCode = ? AND teacherUserName = ?";
+            try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setString(1, classCode);
+                ps.setString(2, teacherUsername);
+                int rowsAffected = ps.executeUpdate();
+                return rowsAffected > 0;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
     
 }

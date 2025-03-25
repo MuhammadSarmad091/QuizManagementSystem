@@ -2,6 +2,8 @@ package UserInterface;
 
 import controllers.TeacherHandler;
 import java.io.IOException;
+import java.util.Optional;
+
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
@@ -14,7 +16,10 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.stage.Stage;
 
 public class DisplayClassController {
@@ -85,7 +90,6 @@ public class DisplayClassController {
             Object controller = loader.getController();
             if (controller instanceof QuizesTabController) {
                 ((QuizesTabController) controller).initData(teacherHandler);
-                System.out.println("Loaded QuizesTabController with teacherHandler: " + teacherHandler);
             } else if (controller instanceof StudentsTabController) {
                 ((StudentsTabController) controller).setTeacherHandler(teacherHandler);
             } else if (controller instanceof TeachersTabController) {
@@ -127,7 +131,36 @@ public class DisplayClassController {
     }
 
     @FXML
-    void handle_remove_class(MouseEvent event) {
-        // Implementation for removal if needed.
+    void handle_remove_class(MouseEvent event) 
+    {
+        // Show confirmation dialog
+        Alert confirmationAlert = new Alert(AlertType.CONFIRMATION);
+        confirmationAlert.setTitle("Confirm Deletion");
+        confirmationAlert.setHeaderText("Delete Class");
+        confirmationAlert.setContentText("Do you really want to delete this class?");
+        
+        Optional<ButtonType> result = confirmationAlert.showAndWait();
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+            // Remove class using teacherHandler
+            teacherHandler.removeClass(teacherHandler.getCurrentClass().getClassCode());
+
+            // Load TeacherHome page
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/UserInterface/TeacherHome.fxml"));
+                Parent teacherHomeRoot = loader.load();
+
+                // Get the controller instance and set the logged-in user
+                TeacherHomeController controller = loader.getController();
+                controller.initData(teacherHandler);
+
+                // Get current stage and replace scene
+                Stage stage = (Stage) remove_class.getScene().getWindow();
+                stage.setScene(new Scene(teacherHomeRoot));
+                stage.setTitle("Teacher Home");
+                stage.show();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

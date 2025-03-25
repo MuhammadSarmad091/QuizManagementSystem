@@ -4,6 +4,8 @@ import businessLayer.Teacher;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -34,7 +36,39 @@ public class TeachersTabController {
 
     @FXML
     void handle_RemoveTeacher(MouseEvent event) {
-        // Implement removal logic if needed.
+        // Retrieve the selected teacher from the TableView.
+        Teacher selectedTeacher = lst_Teachers.getSelectionModel().getSelectedItem();
+        if (selectedTeacher == null) {
+            Alert alert = new Alert(AlertType.WARNING);
+            alert.setTitle("No Selection");
+            alert.setHeaderText("No Teacher Selected");
+            alert.setContentText("Please select a teacher to remove.");
+            alert.showAndWait();
+            return;
+        }
+        
+        // Get the class code from the current class in teacherHandler.
+        String classCode = teacherHandler.getCurrentClass().getClassCode();
+        
+        // Attempt to remove the teacher using teacherHandler.
+        boolean removed = teacherHandler.removeTeacherFromClass(classCode, selectedTeacher.getUsername());
+        
+        if (removed) {
+            // If removal is successful, update the TableView.
+            lst_Teachers.getItems().remove(selectedTeacher);
+            Alert alert = new Alert(AlertType.INFORMATION);
+            alert.setTitle("Removal Successful");
+            alert.setHeaderText(null);
+            alert.setContentText("Teacher removed successfully.");
+            alert.showAndWait();
+        } else {
+            // Notify the user of the failure.
+            Alert alert = new Alert(AlertType.ERROR);
+            alert.setTitle("Removal Failed");
+            alert.setHeaderText(null);
+            alert.setContentText("Failed to remove the teacher.");
+            alert.showAndWait();
+        }
     }
     
     private void loadTeachers() {

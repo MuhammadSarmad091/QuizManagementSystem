@@ -147,4 +147,17 @@ public class TeacherHandler {
     {
     	return classDBH.getDBH().getTeachersInTheClass(classCode);
     }
+    
+    public boolean removeStudentFromClass(String classCode, String studentUsername)
+    {
+    	return classDBH.getDBH().removeStudentFromClass(classCode, studentUsername);
+    }
+    public boolean removeTeacherFromClass(String classCode, String teacherUsername)
+    {
+    	if(teacherUsername.equalsIgnoreCase(this.teacher.getUsername()))
+    	{
+    		return false;
+    	}
+    	return classDBH.getDBH().removeTeacherFromClass(classCode, teacherUsername);
+    }
 }
