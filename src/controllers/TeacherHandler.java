@@ -112,8 +112,14 @@ public class TeacherHandler {
         return quizDBH.getDBH().getSubmissions(quizNo, ccode);
     }
     
-    public void openSubmission(int submissionNo) {
+    public boolean openSubmission(int submissionNo) {
         this.currentSubmission = quizDBH.getDBH().getSubmission(submissionNo);
+        if(this.currentSubmission==null)
+        	return false;
+        this.currentQuiz = quizDBH.getDBH().getQuiz(this.currentSubmission.getQuizNo());
+        if(this.currentQuiz==null)
+        	return false;
+        return true;
     }
     
     public boolean updateMarks(int qNo, float marks) {
@@ -123,11 +129,9 @@ public class TeacherHandler {
         return false;
     }
     
-    public void saveSubmission(int[] Qnos, float[] Marks) {
+    public void saveSubmission() {
         if (this.currentSubmission != null) {
-            for (int i = 0; i < Qnos.length; i++) {
-                this.currentSubmission.updateMarks(Qnos[i], Marks[i]);
-            }
+            this.currentSubmission.calculateTotalMarks();
             this.currentSubmission.setStatus("Graded");
             quizDBH.getDBH().saveSubmission(this.currentSubmission);
         }

@@ -11,11 +11,13 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseEvent;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -121,8 +123,64 @@ public class QuizesTabController {
 
     @FXML
     void handle_Open_one_submission(MouseEvent event) {
-        // Implement if needed.
+        Submission selectedSubmission = submissionTable.getSelectionModel().getSelectedItem();
+
+        if (selectedSubmission == null) {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("No Selection");
+            alert.setHeaderText("No Submission Selected");
+            alert.setContentText("Please select a submission row first.");
+            alert.showAndWait();
+            return;
+        }
+
+        int submissionNo = selectedSubmission.getSubmissionNo();
+        if(submissionNo == 0 )
+        {
+        	 Alert alert = new Alert(Alert.AlertType.ERROR);
+             alert.setTitle("Access Denied");
+             alert.setHeaderText("Submission Not Found");
+             alert.setContentText("There is no submission for this student.");
+             alert.showAndWait();
+             return;
+        }
+        boolean canOpen = teacherHandler.openSubmission(submissionNo);
+
+        if (!canOpen) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Access Denied");
+            alert.setHeaderText("Unable to Open Submission");
+            alert.setContentText("This submission cannot be opened at this time.");
+            alert.showAndWait();
+            return;
+        }
+
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("CheckSubjSubmission.fxml"));
+            Parent root = loader.load();
+
+            CheckSubjSubmissionController controller = loader.getController();
+            controller.initData(teacherHandler); // Make sure this method exists in that controller
+
+            Stage stage = new Stage();
+            stage.setTitle("Check Subjective Submission");
+            stage.setScene(new Scene(root));
+            stage.initModality(Modality.APPLICATION_MODAL); // Block interaction with other windows
+            stage.showAndWait();
+            this.handle_OpenSubmissions(null);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Load Error");
+            alert.setHeaderText("Failed to Load Submission Page");
+            alert.setContentText("An error occurred while trying to open the submission view.");
+            alert.showAndWait();
+        }
     }
+
+
+
 
     @FXML
     void handle_Obj_Quiz(MouseEvent event) {

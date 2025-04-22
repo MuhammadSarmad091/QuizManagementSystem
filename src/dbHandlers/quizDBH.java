@@ -4,12 +4,14 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 import businessLayer.Answer;
+import businessLayer.Question;
 import businessLayer.Quiz;
 import businessLayer.Student;
 import businessLayer.Submission;
@@ -74,24 +76,66 @@ public class quizDBH {
         Connection conn = null;
         try {
             conn = dbManager.connect();
-            String sql = "INSERT INTO Quiz (classCode, quizType, deadLine, totalMarks, quizName) VALUES (?, ?, ?, ?, ?)";
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setString(1, classCode);
-            ps.setString(2, q.getType());
-            // Convert LocalDateTime to SQL Timestamp
-            ps.setTimestamp(3, Timestamp.valueOf(q.getDeadLine()));
-            ps.setFloat(4, q.getTotalMarks());
-            ps.setString(5, q.getName());
-            ps.executeUpdate();
-            ps.close();
+            conn.setAutoCommit(false); // Start transaction
+
+            // Step 1: Insert quiz and retrieve generated quizNo
+            String quizSql = "INSERT INTO Quiz (classCode, quizType, deadLine, totalMarks, quizName) VALUES (?, ?, ?, ?, ?)";
+            PreparedStatement psQuiz = conn.prepareStatement(quizSql, Statement.RETURN_GENERATED_KEYS);
+            psQuiz.setString(1, classCode);
+            psQuiz.setString(2, q.getType());
+            psQuiz.setTimestamp(3, Timestamp.valueOf(q.getDeadLine()));
+            psQuiz.setFloat(4, q.getTotalMarks());
+            psQuiz.setString(5, q.getName());
+            psQuiz.executeUpdate();
+
+            ResultSet rsKeys = psQuiz.getGeneratedKeys();
+            int quizNo = -1;
+            if (rsKeys.next()) {
+                quizNo = rsKeys.getInt(1);
+            }
+            rsKeys.close();
+            psQuiz.close();
+
+            // Step 2: Insert questions
+            if (quizNo != -1 && q.getQuestions() != null) {
+                String qSql = "INSERT INTO Question (quizNo, questionNo, statementt, optA, optB, optC, optD, correctOption, questionType, marks) " +
+                              "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                PreparedStatement psQ = conn.prepareStatement(qSql);
+
+                for (Question question : q.getQuestions()) {
+                    psQ.setInt(1, quizNo);
+                    psQ.setInt(2, question.getQuestionNo());
+                    psQ.setString(3, question.getStatement());
+                    psQ.setString(4, question.getOptA());
+                    psQ.setString(5, question.getOptB());
+                    psQ.setString(6, question.getOptC());
+                    psQ.setString(7, question.getOptD());
+                    psQ.setString(8, question.getCorrectAnswer());
+                    psQ.setString(9, question.getType());
+                    psQ.setFloat(10, question.getMarks());
+
+                    psQ.addBatch();
+                }
+
+                psQ.executeBatch();
+                psQ.close();
+            }
+
+            conn.commit(); // Commit transaction
         } catch (SQLException e) {
             e.printStackTrace();
+            try {
+                if (conn != null) conn.rollback(); // Roll back if error occurs
+            } catch (SQLException rollbackEx) {
+                rollbackEx.printStackTrace();
+            }
         } finally {
             if (conn != null) {
-                try { conn.close(); } catch (SQLException e) { e.printStackTrace(); }
+                try { conn.setAutoCommit(true); conn.close(); } catch (SQLException e) { e.printStackTrace(); }
             }
         }
     }
+
 
     public List<Submission> getSubmissions(int quizNo, String classCode) {
         List<Submission> submissions = new ArrayList<>();
@@ -152,20 +196,49 @@ public class quizDBH {
     public Submission getSubmission(int submissionNo) {
         Submission s = null;
         Connection conn = null;
+
         try {
             conn = dbManager.connect();
-            String sql = "SELECT quizNo, studentUserName, submissionStatus FROM Submission WHERE submissionNo = ?";
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setInt(1, submissionNo);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
+
+            // Step 1: Fetch submission details
+            String sqlSubmission = "SELECT quizNo, studentUserName, submissionDateTime, submissionStatus, totalMarksObtained " +
+                                   "FROM Submission WHERE submissionNo = ?";
+            PreparedStatement psSubmission = conn.prepareStatement(sqlSubmission);
+            psSubmission.setInt(1, submissionNo);
+            ResultSet rsSubmission = psSubmission.executeQuery();
+
+            if (rsSubmission.next()) {
                 s = new Submission();
                 s.setSubmissionNo(submissionNo);
-                s.setStatus(rs.getString("submissionStatus"));
-                s.setStudent(new Student(rs.getString("studentUserName"), "", "student"));
+                s.setQuizNo(rsSubmission.getInt("quizNo"));
+                s.setStudent(new Student(rsSubmission.getString("studentUserName"), "", "student"));
+                s.setSubmissionDateTime(rsSubmission.getTimestamp("submissionDateTime").toLocalDateTime());
+                s.setStatus(rsSubmission.getString("submissionStatus"));
+                s.setTotalMarksObtained(rsSubmission.getFloat("totalMarksObtained"));
             }
-            rs.close();
-            ps.close();
+
+            rsSubmission.close();
+            psSubmission.close();
+
+            // Step 2: Fetch answers only if submission exists
+            if (s != null) {
+                String sqlAnswers = "SELECT questionNo, answer, marksObtained FROM Answer WHERE submissionNo = ?";
+                PreparedStatement psAnswers = conn.prepareStatement(sqlAnswers);
+                psAnswers.setInt(1, submissionNo);
+                ResultSet rsAnswers = psAnswers.executeQuery();
+
+                while (rsAnswers.next()) {
+                    Answer a = new Answer();
+                    a.setQuestionNumber(rsAnswers.getInt("questionNo"));
+                    a.setAnswer(rsAnswers.getString("answer"));
+                    a.setMarksObtained(rsAnswers.getFloat("marksObtained"));
+                    s.addAnswer(a);
+                }
+
+                rsAnswers.close();
+                psAnswers.close();
+            }
+
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
@@ -173,8 +246,10 @@ public class quizDBH {
                 try { conn.close(); } catch (SQLException e) { e.printStackTrace(); }
             }
         }
+
         return s;
     }
+
 
     public void saveSubmission(Submission s) {
         Connection conn = null;
@@ -290,4 +365,67 @@ public class quizDBH {
             }
         }
     }
+    public Quiz getQuiz(int quizNo) {
+        Quiz quiz = null;
+        Connection conn = null;
+
+        try {
+            conn = dbManager.connect();
+
+            // Step 1: Fetch quiz details
+            String sqlQuiz = "SELECT quizName, quizType, deadLine, totalMarks FROM Quiz WHERE quizNo = ?";
+            PreparedStatement psQuiz = conn.prepareStatement(sqlQuiz);
+            psQuiz.setInt(1, quizNo);
+            ResultSet rsQuiz = psQuiz.executeQuery();
+
+            if (rsQuiz.next()) {
+                quiz = new Quiz();
+                quiz.setQuizNo(quizNo);
+                quiz.setName(rsQuiz.getString("quizName"));
+                quiz.setType(rsQuiz.getString("quizType"));
+                quiz.setDeadLine(rsQuiz.getTimestamp("deadLine").toLocalDateTime());
+                quiz.setTotalMarks(rsQuiz.getFloat("totalMarks"));
+            }
+
+            rsQuiz.close();
+            psQuiz.close();
+
+            // Step 2: Fetch questions if quiz exists
+            if (quiz != null) {
+                String sqlQuestions = "SELECT questionNo, questionType, statementt, optA, optB, optC, optD, correctOption, marks " +
+                                      "FROM Question WHERE quizNo = ? ORDER BY questionNo";
+                PreparedStatement psQ = conn.prepareStatement(sqlQuestions);
+                psQ.setInt(1, quizNo);
+                ResultSet rsQ = psQ.executeQuery();
+
+                while (rsQ.next()) {
+                    Question q = new Question();
+                    q.setQuestionNo(rsQ.getInt("questionNo"));
+                    q.setType(rsQ.getString("questionType"));
+                    q.setStatement(rsQ.getString("statementt"));
+                    q.setOptA(rsQ.getString("optA"));
+                    q.setOptB(rsQ.getString("optB"));
+                    q.setOptC(rsQ.getString("optC"));
+                    q.setOptD(rsQ.getString("optD"));
+                    q.setCorrectAnswer(rsQ.getString("correctOption"));
+                    q.setMarks(rsQ.getFloat("marks"));
+
+                    quiz.getQuestions().add(q);
+                }
+
+                rsQ.close();
+                psQ.close();
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            if (conn != null) {
+                try { conn.close(); } catch (SQLException e) { e.printStackTrace(); }
+            }
+        }
+
+        return quiz;
+    }
+
 }
