@@ -13,6 +13,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TextFormatter;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 
@@ -65,6 +66,7 @@ public class LoginController {
             alert.showAndWait();
         }
     }
+    
 
     @FXML
     void handleSignupAction(MouseEvent event) {    
@@ -83,5 +85,18 @@ public class LoginController {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+    
+    @FXML
+    public void initialize() 
+    {
+        // Allow only alphabets and digits in the usernameField
+    	usernameField.setTextFormatter(new TextFormatter<>(change -> {
+            String newText = change.getControlNewText();
+            if (newText.matches("[a-zA-Z0-9]*")) {
+                return change;
+            }
+            return null;
+        }));
     }
 }

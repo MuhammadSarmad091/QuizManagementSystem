@@ -138,27 +138,47 @@ public class QuizesTabController {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("CreateObjQuiz.fxml"));
             Parent root = loader.load();
-            // Optionally pass teacherHandler to the CreateObjQuizController.
+            // Pass teacherHandler to the CreateObjQuizController BEFORE showing the window.
+            CreateObjQuizController controller = loader.getController();
+            controller.initData(teacherHandler);
+            
             Stage newStage = new Stage();
             newStage.setTitle("Objective Quiz");
             newStage.setScene(new Scene(root));
+            
+            // When the new view closes, refresh the quizzes in the main view.
+            newStage.setOnHidden(event -> {
+                loadQuizzes();
+            });
+            
             newStage.show();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
+
     private void OpenSubjQuizFile() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("CreateSubjQuiz.fxml"));
             Parent root = loader.load();
-            // Optionally pass teacherHandler to the CreateSubjQuizController.
+            // Pass teacherHandler to the CreateSubjQuizController BEFORE showing the window.
+            CreateSubjQuizController controller = loader.getController();
+            controller.initData(teacherHandler);
+            
             Stage newStage = new Stage();
             newStage.setTitle("Subjective Quiz");
             newStage.setScene(new Scene(root));
+            
+            // When the child page is closed, call loadQuizzes() to refresh the parent UI.
+            newStage.setOnHidden(event -> {
+                loadQuizzes();
+            });
+            
             newStage.show();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
+
 }

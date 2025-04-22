@@ -160,4 +160,13 @@ public class TeacherHandler {
     	}
     	return classDBH.getDBH().removeTeacherFromClass(classCode, teacherUsername);
     }
+    
+    public List<Teacher> getAllTeachers()
+    {
+    	return userDBH.getDBH().getAllTeachers();
+    }
+    public List<Teacher> getTeacherByName(String name)
+    {
+    	return userDBH.getDBH().getTeacherByName(name);
+    }
 }

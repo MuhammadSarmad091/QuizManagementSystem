@@ -123,10 +123,28 @@ public class classDBH {
     }
     
     public boolean addTeacherInClass(String teacherID, String classCode) {
-        String sql = "INSERT INTO ClassTeacher (classCode, teacherUserName) VALUES (?, ?)";
         Connection conn = null;
         try {
             conn = dbManager.connect();
+            // First check if the teacher is already in the class.
+            String checkSql = "SELECT COUNT(*) FROM ClassTeacher WHERE classCode = ? AND teacherUserName = ?";
+            PreparedStatement checkPs = conn.prepareStatement(checkSql);
+            checkPs.setString(1, classCode);
+            checkPs.setString(2, teacherID);
+            ResultSet rs = checkPs.executeQuery();
+            if (rs.next()) {
+                int count = rs.getInt(1);
+                if (count > 0) {
+                    rs.close();
+                    checkPs.close();
+                    return false;
+                }
+            }
+            rs.close();
+            checkPs.close();
+            
+            // Teacher is not in the class; insert the record.
+            String sql = "INSERT INTO ClassTeacher (classCode, teacherUserName) VALUES (?, ?)";
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.setString(1, classCode);
             ps.setString(2, teacherID);
@@ -138,7 +156,11 @@ public class classDBH {
             return false;
         } finally {
             if (conn != null) {
-                try { conn.close(); } catch (SQLException ex) { ex.printStackTrace(); }
+                try { 
+                    conn.close(); 
+                } catch (SQLException ex) { 
+                    ex.printStackTrace(); 
+                }
             }
         }
     }

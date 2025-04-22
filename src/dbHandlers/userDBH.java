@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import businessLayer.Class;
+import businessLayer.Teacher;
 import businessLayer.User;
 public class userDBH {
     private static userDBH instance;
@@ -39,7 +40,8 @@ public class userDBH {
                 // Create a User object using the retrieved data.
                 user = new User(rs.getString("username"), 
                                 rs.getString("password"), 
-                                rs.getString("userType"));
+                                rs.getString("userType"),
+                                rs.getString("name"));
                 // Note: If you need to use the 'name' field, consider extending your User class.
             }
             rs.close();
@@ -102,5 +104,71 @@ public class userDBH {
         return user;
     }
 
+    public List<Teacher> getAllTeachers() {
+        List<Teacher> teachers = new ArrayList<>();
+        Connection conn = null;
+        try {
+            conn = dbManager.connect();
+            String sql = "SELECT username, password, name, userType FROM Userr WHERE userType = 'teacher'";
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Teacher teacher = new Teacher(
+                        rs.getString("username"),
+                        rs.getString("password"),
+                        rs.getString("userType"),
+                        rs.getString("name")
+                );
+                teachers.add(teacher);
+            }
+            rs.close();
+            ps.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            if (conn != null) {
+                try { 
+                    conn.close(); 
+                } catch (SQLException e) { 
+                    e.printStackTrace(); 
+                }
+            }
+        }
+        return teachers;
+    }
     
+    // Returns a list of teachers whose name matches the provided pattern.
+    public List<Teacher> getTeacherByName(String namePattern) {
+        List<Teacher> teachers = new ArrayList<>();
+        Connection conn = null;
+        try {
+            conn = dbManager.connect();
+            String sql = "SELECT username, password, name, userType FROM Userr WHERE userType = 'teacher' AND name LIKE ?";
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setString(1, "%" + namePattern + "%");
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Teacher teacher = new Teacher(
+                        rs.getString("username"),
+                        rs.getString("password"),
+                        rs.getString("userType"),
+                        rs.getString("name")
+                );
+                teachers.add(teacher);
+            }
+            rs.close();
+            ps.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            if (conn != null) {
+                try { 
+                    conn.close(); 
+                } catch (SQLException e) { 
+                    e.printStackTrace(); 
+                }
+            }
+        }
+        return teachers;
+    }
 }

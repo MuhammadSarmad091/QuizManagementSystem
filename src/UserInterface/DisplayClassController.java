@@ -24,12 +24,10 @@ import javafx.stage.Stage;
 
 public class DisplayClassController {
     
-    private TeacherHandler teacherHandler; // New field to hold TeacherHandler
+    private TeacherHandler teacherHandler;
     
-    // This method now accepts teacherHandler
     public void initData(TeacherHandler handler) {
         this.teacherHandler = handler;
-        // Set up the listener for tab selection changes
         TabPane_Sec.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Tab>() {
             @Override
             public void changed(ObservableValue<? extends Tab> obs, Tab oldTab, Tab newTab) {
@@ -38,7 +36,6 @@ public class DisplayClassController {
                 }
             }
         });
-        // Load default tab content (if any)
         Tab defaultTab = TabPane_Sec.getSelectionModel().getSelectedItem();
         if (defaultTab != null) {
             loadFXMLForTab(defaultTab);
@@ -66,9 +63,8 @@ public class DisplayClassController {
     @FXML
     private Button remove_class;
     
-    // Modified loadFXMLForTab: loads the corresponding FXML and passes teacherHandler to the tab controller.
     private void loadFXMLForTab(Tab tab) {
-        String tabTitle = tab.getText(); // Get the tab's title
+        String tabTitle = tab.getText();
         String fxmlFile = "";
         switch (tabTitle) {
             case "Quizzes":
@@ -113,15 +109,13 @@ public class DisplayClassController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/UserInterface/AddTeacherCLass.fxml"));
             Parent root = loader.load();
 
-            // Get controller instance
+            // Get controller instance and pass the teacherHandler
             AddTeacherClassController controller = loader.getController();
-            if (controller != null) {
-                controller.initialize();
-            }
+            controller.initData(teacherHandler);
 
-            // Create new stage
+            // Create new stage and show the view
             Stage stage = new Stage();
-            stage.setTitle("Check Objective Submission");
+            stage.setTitle("Add Teacher To Class");
             stage.setScene(new Scene(root));
             stage.show();
 
@@ -129,6 +123,7 @@ public class DisplayClassController {
             e.printStackTrace();
         }
     }
+
 
     @FXML
     void handle_remove_class(MouseEvent event) 

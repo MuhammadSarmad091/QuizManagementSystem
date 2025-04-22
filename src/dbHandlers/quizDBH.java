@@ -74,21 +74,15 @@ public class quizDBH {
         Connection conn = null;
         try {
             conn = dbManager.connect();
-            String sql = "INSERT INTO Quiz (classCode, quizType, deadLine, totalMarks) VALUES (?, ?, ?, ?)";
+            String sql = "INSERT INTO Quiz (classCode, quizType, deadLine, totalMarks, quizName) VALUES (?, ?, ?, ?, ?)";
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.setString(1, classCode);
             ps.setString(2, q.getType());
             // Convert LocalDateTime to SQL Timestamp
             ps.setTimestamp(3, Timestamp.valueOf(q.getDeadLine()));
             ps.setFloat(4, q.getTotalMarks());
-            int rows = ps.executeUpdate();
-            if (rows > 0) {
-                ResultSet rs = ps.getGeneratedKeys();
-                if (rs.next()) {
-                    q.setQuizNo(rs.getInt(1));
-                }
-                rs.close();
-            }
+            ps.setString(5, q.getName());
+            ps.executeUpdate();
             ps.close();
         } catch (SQLException e) {
             e.printStackTrace();

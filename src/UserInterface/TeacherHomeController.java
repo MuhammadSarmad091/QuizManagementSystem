@@ -63,7 +63,7 @@ public class TeacherHomeController {
         // Now update UI elements with user data.
         if (teacherHandler != null) {
             UsernameText.setText(teacherHandler.getTeacher().getUsername());
-            NameText.setText("Add name attribute");
+            NameText.setText(teacherHandler.getTeacher().getName());
         }
         loadDataFromDatabase();
     }

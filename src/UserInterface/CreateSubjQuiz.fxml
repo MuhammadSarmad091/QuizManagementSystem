@@ -23,8 +23,8 @@
             </Label>
             <TableView fx:id="Lst_Ques" layoutX="800.0" layoutY="128.0" prefHeight="516.0" prefWidth="430.0">
                <columns>
-                  <TableColumn prefWidth="75.0" text="C1" />
-                  <TableColumn prefWidth="75.0" text="C2" />
+                  <TableColumn fx:id="num_tbl" prefWidth="75.0" text="No." />
+                  <TableColumn fx:id="mcq_tbl" prefWidth="354.4" text="Question" />
                </columns>
             </TableView>
             <DatePicker fx:id="Deadline" layoutX="226.0" layoutY="136.0" prefHeight="44.0" prefWidth="442.0" />
@@ -33,7 +33,7 @@
                   <Font name="Arial Black" size="18.0" />
                </font>
             </Label>
-            <Label layoutX="75.0" layoutY="204.0" prefHeight="38.0" prefWidth="150.0" text="Statement:">
+            <Label layoutX="75.0" layoutY="204.0" prefHeight="38.0" prefWidth="150.0" text="Question:">
                <font>
                   <Font name="Arial Black" size="18.0" />
                </font>

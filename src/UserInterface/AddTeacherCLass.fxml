@@ -24,12 +24,12 @@
                 <TableColumn fx:id="name_t" prefWidth="509.5998840332031" text="Name" />
               </columns>
             </TableView>
-            <Label layoutX="420.2" layoutY="116.0" prefHeight="32.0" prefWidth="157.0" text="Teacher UserName:" AnchorPane.bottomAnchor="652.0" AnchorPane.leftAnchor="420.2" AnchorPane.rightAnchor="702.2" AnchorPane.topAnchor="116.0">
+            <Label layoutX="420.2" layoutY="116.0" prefHeight="32.0" prefWidth="157.0" text="Teacher Name:" AnchorPane.bottomAnchor="652.0" AnchorPane.leftAnchor="420.2" AnchorPane.rightAnchor="702.2" AnchorPane.topAnchor="116.0">
                <font>
                   <Font name="Arial Bold" size="15.0" />
                </font>
             </Label>
-            <TextField fx:id="UserName" layoutX="576.2" layoutY="116.0" prefHeight="32.0" prefWidth="222.0" promptText="Enter UserName" AnchorPane.bottomAnchor="652.0" AnchorPane.leftAnchor="576.2" AnchorPane.rightAnchor="481.4" AnchorPane.topAnchor="116.0">
+            <TextField fx:id="UserName" layoutX="551.4" layoutY="116.0" prefHeight="32.0" prefWidth="222.0" promptText="Enter UserName" AnchorPane.bottomAnchor="652.0" AnchorPane.leftAnchor="551.4" AnchorPane.rightAnchor="506.20000000000005" AnchorPane.topAnchor="116.0">
                <font>
                   <Font name="Arial Black" size="12.0" />
                </font>

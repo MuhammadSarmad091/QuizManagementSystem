@@ -22,10 +22,10 @@
                   <Font name="Arial Bold" size="31.0" />
                </font>
             </Label>
-            <TableView fx:id="Lst_Ques" layoutX="800.0" layoutY="128.0" prefHeight="516.0" prefWidth="430.0">
+            <TableView fx:id="Lst_Ques" layoutX="800.0" layoutY="169.0" prefHeight="475.0" prefWidth="418.0">
               <columns>
-                <TableColumn prefWidth="75.0" text="C1" />
-                <TableColumn prefWidth="75.0" text="C2" />
+                  <TableColumn fx:id="num_tbl" prefWidth="56.0" text="No." />
+                  <TableColumn fx:id="mcq_tbl" prefWidth="361.6000122070312" text="MCQ" />
               </columns>
             </TableView>
             <TextField fx:id="OptionA" layoutX="218.0" layoutY="320.0" prefHeight="47.0" prefWidth="450.0" promptText="Enter" style="-fx-border-width: 0px 0px 1px 0px; -fx-border-color: black; -fx-background-color: white;">
@@ -98,19 +98,6 @@
                   <Font name="Arial Black" size="18.0" />
                </font>
             </Label>
-            <TextField fx:id="Marks" accessibleRole="INCREMENT_BUTTON" layoutX="216.0" layoutY="560.0" prefHeight="47.0" prefWidth="450.0" promptText="Enter" style="-fx-border-width: 0px 0px 1px 0px; -fx-border-color: black; -fx-background-color: white;">
-               <font>
-                  <Font name="Verdana" size="17.0" />
-               </font>
-               <cursor>
-                  <Cursor fx:constant="DEFAULT" />
-               </cursor>
-            </TextField>
-            <Label layoutX="80.0" layoutY="566.0" prefHeight="38.0" prefWidth="150.0" text="Marks:">
-               <font>
-                  <Font name="Arial Black" size="18.0" />
-               </font>
-            </Label>
             <Button fx:id="add_ques" layoutX="242.0" layoutY="629.0" mnemonicParsing="false" onMouseClicked="#handle_add_ques" style="-fx-background-color: green;" text="Add" textFill="WHITE">
                <font>
                   <Font name="Arial Bold" size="16.0" />
@@ -137,6 +124,11 @@
             <Label layoutX="76.0" layoutY="86.0" prefHeight="38.0" prefWidth="150.0" text="Quiz Name:">
                <font>
                   <Font name="Arial Black" size="18.0" />
+               </font>
+            </Label>
+            <Label layoutX="916.0" layoutY="115.0" prefHeight="41.0" prefWidth="203.0" text="List of MCQs">
+               <font>
+                  <Font name="Arial Bold" size="26.0" />
                </font>
             </Label>
          </children>

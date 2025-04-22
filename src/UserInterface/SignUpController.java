@@ -15,6 +15,7 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TextFormatter;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 
@@ -44,6 +45,22 @@ public class SignUpController {
         // Add "Teacher" and "Student" items; prompt set to "Select"
         typeSelectCB.setItems(FXCollections.observableArrayList("Teacher", "Student"));
         typeSelectCB.setPromptText("Select");
+        Name.setTextFormatter(new TextFormatter<>(change -> {
+            String newText = change.getControlNewText();
+            if (newText.matches("^[a-zA-Z]+( [a-zA-Z]*)?$") || newText.isEmpty()) {
+                return change;
+            }
+            return null;
+        }));
+
+        // Username field: only letters and numbers
+        usernameField.setTextFormatter(new TextFormatter<>(change -> {
+            String newText = change.getControlNewText();
+            if (newText.matches("[a-zA-Z0-9]*")) {
+                return change;
+            }
+            return null;
+        }));
     }
     
     @FXML
@@ -132,4 +149,6 @@ public class SignUpController {
         alert.setContentText(message);
         alert.showAndWait();
     }
+    
+    
 }
