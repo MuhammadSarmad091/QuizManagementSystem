@@ -3,6 +3,7 @@ package UserInterface;
 import java.io.IOException;
 import dbHandlers.userDBH;
 import businessLayer.User;
+import controllers.StudentHandler;
 import controllers.TeacherHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -36,26 +37,44 @@ public class LoginController {
         // Get user inputs
         String username = usernameField.getText();
         String password = passwordField.getText();
-        
+
         // Call the login function from the DB handler
         User user = userDBH.getDBH().logIn(username, password);
-        TeacherHandler handler = new TeacherHandler();
-        handler.setTeacher(user);
+
         if (user != null) {
-            // If login successful, load TeacherHome page and pass the user object.
             try {
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("/UserInterface/TeacherHome.fxml"));
-                Parent teacherHomeRoot = loader.load();
-
-                // Get the controller instance and set the logged-in user.
-                TeacherHomeController controller = loader.getController();
-                controller.initData(handler); // Optionally call initialize if needed
-
-                // Get the current stage and set the new scene.
                 Stage stage = (Stage) loginButton.getScene().getWindow();
-                stage.setScene(new Scene(teacherHomeRoot));
-            } catch (IOException e) {
+                FXMLLoader loader;
+                Parent root;
+
+                if (user.getType().equalsIgnoreCase("Teacher")) {
+                    // Load Teacher UI
+                    TeacherHandler handler = new TeacherHandler();
+                    handler.setTeacher(user);
+                    loader = new FXMLLoader(getClass().getResource("/UserInterface/TeacherHome.fxml"));
+                    root = loader.load();
+                    TeacherHomeController controller = loader.getController();
+                    controller.initData(handler);
+                } else if (user.getType().equalsIgnoreCase("Student")) {
+                    // Load Student UI
+                    StudentHandler handler = new StudentHandler();
+                    handler.setStudent(user);
+                    loader = new FXMLLoader(getClass().getResource("/UserInterface/StudentHome.fxml"));
+                    root = loader.load();
+                    StudentHomeController controller = loader.getController();
+                    controller.initData(handler);
+                } else {
+                    throw new Exception("Unsupported user type: " + user.getType());
+                }
+
+                stage.setScene(new Scene(root));
+            } catch (Exception e) {
                 e.printStackTrace();
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Login Error");
+                alert.setHeaderText("Error during login");
+                alert.setContentText("Could not load UI: " + e.getMessage());
+                alert.showAndWait();
             }
         } else {
             // If login fails, show an error alert.
@@ -66,6 +85,7 @@ public class LoginController {
             alert.showAndWait();
         }
     }
+
     
 
     @FXML

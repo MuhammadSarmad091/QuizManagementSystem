@@ -3,6 +3,7 @@ package UserInterface;
 import java.io.IOException;
 import dbHandlers.userDBH;
 import businessLayer.User;
+import controllers.StudentHandler;
 import controllers.TeacherHandler;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -97,8 +98,7 @@ public class SignUpController {
             if (newUser.getType().equalsIgnoreCase("teacher")) {
                 loadTeacherHome(newUser);
             } else if (newUser.getType().equalsIgnoreCase("student")) {
-                // TODO: Handle student home navigation later.
-                showAlert(Alert.AlertType.INFORMATION, "Sign Up", "Student sign up successful. Student home screen to be implemented.");
+                this.loadStudentHome(newUser);
             }
         } else {
             // Sign up failed: either username exists or other error occurred.
@@ -120,6 +120,24 @@ public class SignUpController {
             // Get the current stage and load the new scene
             Stage stage = (Stage) Signupbtn.getScene().getWindow();
             stage.setScene(new Scene(teacherHomeRoot));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    private void loadStudentHome(User user) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/UserInterface/StudentHome.fxml"));
+            Parent studentHomeRoot = loader.load();
+            StudentHandler handler = new StudentHandler();
+            handler.setStudent(user);
+            
+            // Pass the logged-in user to TeacherHomeController
+            StudentHomeController controller = loader.getController();
+            controller.initData(handler);
+            
+            // Get the current stage and load the new scene
+            Stage stage = (Stage) Signupbtn.getScene().getWindow();
+            stage.setScene(new Scene(studentHomeRoot));
         } catch (IOException e) {
             e.printStackTrace();
         }

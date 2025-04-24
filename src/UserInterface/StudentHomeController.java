@@ -1,10 +1,13 @@
 package UserInterface;
 
 import UserInterface.OpenClassController;
+import controllers.StudentHandler;
+import businessLayer.Class;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -29,6 +32,7 @@ import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 
 public class StudentHomeController {
+	StudentHandler studentHandler;
 
     @FXML
     private AnchorPane CenterPane;
@@ -64,38 +68,41 @@ public class StudentHomeController {
     
     public void initialize() 
 	{
+
+    }
+    
+    public void initData(StudentHandler handler)
+    {
+    	this.studentHandler = handler;
+    	if (studentHandler != null) {
+            UsernameText.setText(studentHandler.getStudent().getUsername());
+            NameText.setText(studentHandler.getStudent().getName());
+        }
         loadDataFromDatabase();
     }
 
     
     private void ReloadPage() {
-		// TODO Auto-generated method stub
-    	try {
-    	    FXMLLoader loader = new FXMLLoader(getClass().getResource("/UserInterface/StudentHome.fxml"));
-    	    Parent StudentHomeRoot = loader.load();
-
-    	    // Get the controller instance
-    	    StudentHomeController controller = loader.getController();
-    	    
-    	    // Explicitly call initialize() (optional, JavaFX calls it automatically)
-    	    if (controller != null) {
-    	        controller.initialize();
-    	    }
-
-    	    // Get the current stage
-    	    Stage stage = (Stage) Home.getScene().getWindow();
-    	    // Set the new scene
-    	    stage.setScene(new Scene(StudentHomeRoot));
-    
-    	} catch (IOException e) {
-    	    e.printStackTrace();
-    	}
-		
-	}
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/UserInterface/StudentHome.fxml"));
+            Parent studentrHomeRoot = loader.load();
+            
+            StudentHomeController controller = loader.getController();
+            if (controller != null) {
+                controller.initData(studentHandler);
+            }
+            
+            Stage stage = (Stage) Home.getScene().getWindow();
+            stage.setScene(new Scene(studentrHomeRoot));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 	
 	
 
-    private Object openJoinClassWindow() {
+    private Object openJoinClassWindow() 
+    {
 		// TODO Auto-generated method stus
         
         ////loading createNewClass/////
@@ -107,7 +114,7 @@ public class StudentHomeController {
             JoinClassController controller = loader.getController();
     	    if (controller != null) 
     	    {
-    	        controller.initialize();
+    	        controller.initData(studentHandler);
     	    }
 
             // Load FXML inside CenterPane (without changing the whole scene)
@@ -181,118 +188,93 @@ public class StudentHomeController {
 
 
 	//////LOADING DATA
-    private void loadDataFromDatabase() {
-    	ArrayList<String> courses = new ArrayList<>(Arrays.asList(
-    		    "Software Engineering", "CS1004",
-    		    "Software Architecture", "CS1003",
-    		    "Software Design", "CS1002",
-    		    "Software Ddesign", "CS1004",
-    		    "Software Dedsign", "CS1005",
-    		    "Software Dedsign", "CS1006",
-    		    "Software Dedsign", "CS1007",
-    		    "Software Dedsign", "CS1008",
-    		    "Software Dedsign", "CS1009",
-    		    "Software Dedsign", "CS1010",
-    		    "Software Dedsign", "CS1011",
-    		    "Software Dedsign", "CS1012",
-    		    "Software Dedsign", "CS1013",
-    		    "Software Dedsign", "CS1014",
-    		    "Software Dedsign", "CS1015",
-    		    "Software Dedsign", "CS1016"
-    		));
+	private void loadDataFromDatabase() {
+	    // Fetch the list of classes the student is enrolled in
+	    List<Class> classes = studentHandler.getClasses();
 
-    		// Create a GridPane for displaying courses
-    		GridPane gridPane = new GridPane();
-    		gridPane.setHgap(20);
-    		gridPane.setVgap(20);
-    		gridPane.setStyle("-fx-background-color: #ffffff; -fx-padding: 20px; -fx-border-radius: 10px; -fx-border-color: #cccccc;");
+	    // Create a GridPane for displaying courses
+	    GridPane gridPane = new GridPane();
+	    gridPane.setHgap(20);
+	    gridPane.setVgap(20);
+	    gridPane.setStyle("-fx-background-color: #ffffff; -fx-padding: 20px; -fx-border-radius: 10px; -fx-border-color: #cccccc;");
+	    gridPane.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 
-    		// Ensure GridPane fills available space
-    		gridPane.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+	    // Configure GridPane to expand dynamically (3 columns)
+	    for (int i = 0; i < 3; i++) {
+	        ColumnConstraints colConst = new ColumnConstraints();
+	        colConst.setHgrow(Priority.ALWAYS);
+	        colConst.setPercentWidth(100.0 / 3);
+	        gridPane.getColumnConstraints().add(colConst);
+	    }
 
-    		// Configure GridPane to expand dynamically
-    		for (int i = 0; i < 3; i++) { // 3 columns
-    		    ColumnConstraints colConst = new ColumnConstraints();
-    		    colConst.setHgrow(Priority.ALWAYS);
-    		    colConst.setPercentWidth(100.0 / 3); // Equal width
-    		    gridPane.getColumnConstraints().add(colConst);
-    		}
+	    int row = 0, col = 0;
+	    for (Class cls : classes) {
+	        String courseName = cls.getClassName();
+	        String courseCode = cls.getClassCode();
 
-    		int row = 0, col = 0;
-    		for (int i = 0; i < courses.size(); i += 2) {
-    		    String courseName = courses.get(i);
-    		    String courseCode = courses.get(i + 1);
+	        // Create a VBox for each course
+	        VBox courseBox = new VBox(8);
+	        courseBox.setStyle("-fx-border-color: #444; " +
+	                           "-fx-border-width: 1px; " +
+	                           "-fx-background-color: linear-gradient(to bottom, #f8f9fa, #e9ecef); " +
+	                           "-fx-background-radius: 10px; " +
+	                           "-fx-border-radius: 10px; " +
+	                           "-fx-padding: 15px; " +
+	                           "-fx-alignment: center;");
+	        courseBox.setMinSize(180, 120);
+	        courseBox.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 
-    		    // Create a VBox for each course
-    		    VBox courseBox = new VBox(8);
-    		    courseBox.setStyle("-fx-border-color: #444; " +
-    		                       "-fx-border-width: 1px; " +
-    		                       "-fx-background-color: linear-gradient(to bottom, #f8f9fa, #e9ecef); " +
-    		                       "-fx-background-radius: 10px; " +
-    		                       "-fx-border-radius: 10px; " +
-    		                       "-fx-padding: 15px; " +
-    		                       "-fx-alignment: center;");
-    		    courseBox.setMinSize(180, 120);
-    		    courseBox.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+	        // Set action on click: open class details
+	        courseBox.setOnMouseClicked(e -> openCourseDetails(courseName, courseCode));
 
-    		    // Set action on click
-    		    courseBox.setOnMouseClicked(event -> openCourseDetails(courseName, courseCode));
+	        // Course name label
+	        Label courseLabel = new Label(courseName);
+	        courseLabel.setFont(Font.font("Arial", FontWeight.BOLD, 14));
+	        courseLabel.setStyle("-fx-text-fill: #333;");
 
-    		    // Labels
-    		    Label courseLabel = new Label(courseName);
-    		    courseLabel.setFont(Font.font("Arial", FontWeight.BOLD, 14));
-    		    courseLabel.setStyle("-fx-text-fill: #333;");
+	        // Course code label
+	        Label codeLabel = new Label(courseCode);
+	        codeLabel.setFont(Font.font("Arial", 12));
+	        codeLabel.setStyle("-fx-text-fill: gray;");
 
-    		    Label codeLabel = new Label(courseCode);
-    		    codeLabel.setFont(Font.font("Arial", 12));
-    		    codeLabel.setStyle("-fx-text-fill: gray;");
+	        courseBox.getChildren().addAll(courseLabel, codeLabel);
+	        GridPane.setMargin(courseBox, new Insets(20));
+	        gridPane.add(courseBox, col, row);
 
-    		    courseBox.getChildren().addAll(courseLabel, codeLabel);
-    		    GridPane.setMargin(courseBox, new Insets(20));
+	        col++;
+	        if (col > 2) {
+	            col = 0;
+	            row++;
+	        }
+	    }
 
-    		    gridPane.add(courseBox, col, row);
+	    // "Join New Class" button at the end
+	    Button joinClassButton = new Button("+ Join New Class");
+	    joinClassButton.setStyle("-fx-background-color: #28a745; -fx-text-fill: white; -fx-font-size: 14px; -fx-padding: 10px 15px; -fx-border-radius: 5px;");
+	    joinClassButton.setMinSize(180, 40);
+	    joinClassButton.setOnAction(e -> openJoinClassWindow());
 
-    		    col++;
-    		    if (col > 2) { // 3 columns per row
-    		        col = 0;
-    		        row++;
-    		    }
-    		}
+	    VBox buttonBox = new VBox(joinClassButton);
+	    buttonBox.setAlignment(Pos.CENTER);
+	    GridPane.setMargin(buttonBox, new Insets(40));
+	    gridPane.add(buttonBox, col, row);
 
-    		// 🔹 ADD "Create New Class" BUTTON AT THE END 🔹
-    		Button createClassButton = new Button("+ Join New Class");
-    		createClassButton.setStyle("-fx-background-color: #28a745; -fx-text-fill: white; -fx-font-size: 14px; -fx-padding: 10px 15px; -fx-border-radius: 5px;");
-    		createClassButton.setMinSize(180, 40);
-    		createClassButton.setOnAction(event -> openJoinClassWindow());
+	    // Wrap GridPane in a ScrollPane
+	    ScrollPane scrollPane = new ScrollPane(gridPane);
+	    scrollPane.setFitToWidth(true);
+	    scrollPane.setPannable(true);
+	    scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+	    scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+	    scrollPane.setStyle("-fx-background-color: transparent;");
 
-    		// Wrap button in a VBox for alignment
-    		VBox buttonBox = new VBox(createClassButton);
-    		buttonBox.setAlignment(Pos.CENTER);
-    		GridPane.setMargin(buttonBox, new Insets(40));
+	    // Add to CenterPane
+	    StackPane wrapper = new StackPane(scrollPane);
+	    wrapper.setAlignment(Pos.CENTER);
+	    wrapper.prefWidthProperty().bind(CenterPane.widthProperty());
+	    wrapper.prefHeightProperty().bind(CenterPane.heightProperty());
 
-    		gridPane.add(buttonBox, col, row); // Add at the next available grid position
-
-    		// 🔹 WRAP GridPane in a SCROLLPANE 🔹
-    		ScrollPane scrollPane = new ScrollPane(gridPane);
-    		scrollPane.setFitToWidth(true);  // Allow content to stretch horizontally
-    		scrollPane.setPannable(true);    // Enable scrolling
-    		scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER); // Hide horizontal scrollbar
-    		scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED); // Show vertical scrollbar when needed
-
-    		// Set ScrollPane to not overlap with TopHead
-    		scrollPane.setStyle("-fx-background-color: transparent;");
-    		scrollPane.setPrefHeight(CenterPane.getHeight()); // Ensuring it fits within CenterPane
-
-    		StackPane wrapper = new StackPane();
-    		wrapper.getChildren().add(scrollPane);
-    		wrapper.setAlignment(Pos.CENTER);
-
-    		// Bind size so that it resizes correctly
-    		wrapper.prefWidthProperty().bind(CenterPane.widthProperty());
-    		wrapper.prefHeightProperty().bind(CenterPane.heightProperty());
-
-    		CenterPane.getChildren().clear();
-    		CenterPane.getChildren().add(wrapper);
+	    CenterPane.getChildren().setAll(wrapper);
 	}
+
 
 }

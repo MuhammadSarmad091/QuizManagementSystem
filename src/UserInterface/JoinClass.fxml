@@ -21,17 +21,7 @@
                   <Font name="Arial Black" size="18.0" />
                </font>
             </Label>
-            <Label layoutX="381.0" layoutY="316.0" prefHeight="44.0" prefWidth="284.0" text="Class Name:">
-               <font>
-                  <Font name="Arial Black" size="18.0" />
-               </font>
-            </Label>
             <TextField fx:id="class_code" layoutX="581.0" layoutY="281.0" prefHeight="31.0" prefWidth="300.0" promptText="Enter Class Code">
-               <font>
-                  <Font name="Arial" size="17.0" />
-               </font>
-            </TextField>
-            <TextField fx:id="class_name" layoutX="581.0" layoutY="322.0" prefHeight="31.0" prefWidth="300.0" promptText="Enter Class Name">
                <font>
                   <Font name="Arial" size="17.0" />
                </font>
