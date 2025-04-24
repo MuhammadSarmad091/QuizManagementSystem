@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="541.0" prefWidth="1283.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="UserInterface.QuizesTab2Controller">
+   <children>
+      <TableView fx:id="Lst_Quizes" layoutX="351.0" layoutY="47.0" prefHeight="378.0" prefWidth="701.0">
+         <columns>
+            <TableColumn prefWidth="107.19998168945312" text="Quiz No" />
+            <TableColumn prefWidth="184.26669311523438" text="Name" />
+            <TableColumn minWidth="2.13330078125" prefWidth="117.59991455078125" text="Type" />
+            <TableColumn prefWidth="84.53326416015625" text="Due" />
+            <TableColumn prefWidth="89.0667724609375" text="Marks" />
+            <TableColumn prefWidth="116.79995117187502" text="Status" />
+         </columns>
+      </TableView>
+      <Button fx:id="Open_Quiz" layoutX="619.0" layoutY="449.0" mnemonicParsing="false" onMouseClicked="#handle_OpenQuiz" prefHeight="37.0" prefWidth="179.0" style="-fx-background-color: green;" text="Open Quiz" textFill="WHITE">
+         <font>
+            <Font name="Arial Bold" size="16.0" />
+         </font>
+      </Button>
+      <Label layoutX="71.0" layoutY="32.0" prefHeight="38.0" prefWidth="222.0" text="All Assigned Quizzes:">
+         <font>
+            <Font name="Arial Bold" size="18.0" />
+         </font>
+      </Label>
+   </children>
+</AnchorPane>
