@@ -56,7 +56,6 @@ public class QuizesTab2Controller {
     }
 
     private void loadQuizzes() {
-    	System.out.println("Here\n");
         // fetch and show data
         List<Submission_Quiz> list = studentHandler.getSubmission_Quizzes();
         if(list == null || list.isEmpty())
@@ -74,6 +73,11 @@ public class QuizesTab2Controller {
     	boolean editable = false;
         if (selected == null) {
             new Alert(Alert.AlertType.WARNING, "Please select a quiz first.").showAndWait();
+            return;
+        }
+        if (selected.getStatus().equalsIgnoreCase("Missing"))
+        {
+        	new Alert(Alert.AlertType.ERROR, "No Submission found.").showAndWait();
             return;
         }
         int quizNo = selected.getQuizNo();

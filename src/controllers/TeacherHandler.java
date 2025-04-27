@@ -181,7 +181,6 @@ public class TeacherHandler {
     	{
     		return false;
     	}
-    	this.removeTeacherFromClass(this.currentClass.getClassCode(), this.teacher.getUsername());
-    	return true;   	
+    	return classDBH.getDBH().removeTeacherFromClass(this.currentClass.getClassCode(), this.teacher.getUsername());   	
     }
 }

@@ -1,7 +1,11 @@
 package UserInterface;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -37,6 +41,7 @@ public class AttemptObjQuizController {
     @FXML private TextField StdName;
     @FXML private TextField TotalMarks;
     @FXML private Button Submit_Quiz;
+    @FXML private TextField Date_txtfld;
 
     /**
      * Called to initialize this controller with data and editability.
@@ -110,6 +115,15 @@ public class AttemptObjQuizController {
         Quiz quiz = studentHandler.getCurrentQuiz();
         Submission sub = studentHandler.getCurrentSubmission();
         if (quiz == null || sub == null) return;
+        
+        ZonedDateTime zonedDateTime = sub.getSubmissionDateTime()
+                .atZone(ZoneId.of("Asia/Karachi"));
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(
+        		"EEE MMM dd HH:mm:ss z yyyy", Locale.ENGLISH);
+
+        this.Date_txtfld.setText(zonedDateTime.format(formatter));
+        this.Date_txtfld.setEditable(false);
 
 
         VBox vbox = new VBox(15);

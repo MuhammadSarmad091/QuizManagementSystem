@@ -57,7 +57,7 @@
                   <Font name="Arial Bold" size="16.0" />
                </font>
             </Button>
-            <Button fx:id="leave_class_btn" layoutX="1034.0" layoutY="33.0" mnemonicParsing="false" onMouseClicked="#handle_remove_class" prefHeight="22.0" prefWidth="160.0" style="-fx-background-color: #a30303;" text="Leave Class" textFill="WHITE">
+            <Button fx:id="leave_class_btn" layoutX="1034.0" layoutY="33.0" mnemonicParsing="false" onMouseClicked="#handle_leave_class" prefHeight="22.0" prefWidth="160.0" style="-fx-background-color: #a30303;" text="Leave Class" textFill="WHITE">
                <font>
                   <Font name="Arial Bold" size="16.0" />
                </font>

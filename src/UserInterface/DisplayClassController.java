@@ -63,6 +63,9 @@ public class DisplayClassController {
     @FXML
     private Button remove_class;
     
+    @FXML
+    private Button leave_class_btn;
+    
     private void loadFXMLForTab(Tab tab) {
         String tabTitle = tab.getText();
         String fxmlFile = "";
@@ -158,4 +161,36 @@ public class DisplayClassController {
             }
         }
     }
+    
+    @FXML
+    void handle_leave_class(MouseEvent event) 
+    {
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, "Are you sure you want to leave this class?");
+        confirm.setHeaderText(null);
+        Optional<ButtonType> result = confirm.showAndWait();
+
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+            boolean success = this.teacherHandler.leaveClass();
+
+            if (success) {
+                try {
+                    FXMLLoader loader = new FXMLLoader(getClass().getResource("/UserInterface/TeacherHome.fxml"));
+                    Parent root = loader.load();
+                    TeacherHomeController controller = loader.getController();
+                    controller.initData(teacherHandler);
+
+                    Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
+                    stage.setScene(new Scene(root));
+                    stage.show();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                Alert error = new Alert(Alert.AlertType.ERROR, "You are the only teacher left in the class. You can't leave the class. Proceed to remove class option.");
+                error.setHeaderText(null);
+                error.showAndWait();
+            }
+        }
+    }
+
 }
