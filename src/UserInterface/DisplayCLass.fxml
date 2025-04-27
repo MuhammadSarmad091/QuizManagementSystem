@@ -15,7 +15,7 @@
     <tabs>
         <Tab styleClass="tabpane.css" text="Quizzes">
         <content>
-                <fx:include source="QuizesTab.fxml"/>
+                <fx:include source="QuizesTab.fxml" />
             </content>
             </Tab>
         <Tab text="Students" />
@@ -53,6 +53,11 @@
                </font>
             </Button>
             <Button fx:id="remove_class" layoutX="848.0" layoutY="34.0" mnemonicParsing="false" onMouseClicked="#handle_remove_class" prefHeight="22.0" prefWidth="160.0" style="-fx-background-color: #a30303;" text="Remove Class" textFill="WHITE">
+               <font>
+                  <Font name="Arial Bold" size="16.0" />
+               </font>
+            </Button>
+            <Button fx:id="leave_class_btn" layoutX="1034.0" layoutY="33.0" mnemonicParsing="false" onMouseClicked="#handle_remove_class" prefHeight="22.0" prefWidth="160.0" style="-fx-background-color: #a30303;" text="Leave Class" textFill="WHITE">
                <font>
                   <Font name="Arial Bold" size="16.0" />
                </font>

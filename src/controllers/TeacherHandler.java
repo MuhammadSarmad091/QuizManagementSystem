@@ -173,4 +173,15 @@ public class TeacherHandler {
     {
     	return userDBH.getDBH().getTeacherByName(name);
     }
+    
+    public boolean leaveClass()
+    {
+    	List<Teacher> list = classDBH.getDBH().getTeachersInTheClass(this.currentClass.getClassCode());
+    	if(list.size() == 1)
+    	{
+    		return false;
+    	}
+    	this.removeTeacherFromClass(this.currentClass.getClassCode(), this.teacher.getUsername());
+    	return true;   	
+    }
 }

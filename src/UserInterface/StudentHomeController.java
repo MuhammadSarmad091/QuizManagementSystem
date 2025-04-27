@@ -146,6 +146,13 @@ public class StudentHomeController {
 		    if (controller != null) {
 		        controller.initialize(courseName, courseCode);
 		    }
+		    Class new_class = new Class();
+		    new_class.setClassCode(courseCode);
+		    new_class.setClassName(courseName);
+		    
+		    this.studentHandler.setCurrentClass(new_class);
+		    
+		    controller.initData(studentHandler);
 
 		    // Wrap in AnchorPane to manually set constraints
 		    AnchorPane wrapper = new AnchorPane(newClassRoot);

@@ -165,12 +165,34 @@ public class CreateSubjQuizController {
     void handle_create_SubjQuiz(MouseEvent event) {
         String quizName = QuizName.getText().trim();
         LocalDate selectedDate = Deadline.getValue();
+        LocalDate nowDate = LocalDate.now();
         
         if (quizName.isEmpty() || selectedDate == null) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("Validation Error");
             alert.setHeaderText(null);
             alert.setContentText("Quiz Name and Deadline must be provided.");
+            alert.showAndWait();
+            return;
+        }
+        List<Question> questions = this.teacherHandler.getCurrentQuiz().getQuestions();
+        
+        if (questions == null || questions.isEmpty())
+        {
+        	Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Error");
+            alert.setHeaderText(null);
+            alert.setContentText("Quiz must contain at least 1 question");
+            alert.showAndWait();
+            return;
+        }
+        
+        if(selectedDate.isBefore(nowDate))
+        {
+        	Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Error");
+            alert.setHeaderText(null);
+            alert.setContentText("Please select valid due date");
             alert.showAndWait();
             return;
         }

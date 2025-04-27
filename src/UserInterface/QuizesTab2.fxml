@@ -9,14 +9,15 @@
 
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="541.0" prefWidth="1283.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="UserInterface.QuizesTab2Controller">
    <children>
-      <TableView fx:id="Lst_Quizes" layoutX="351.0" layoutY="47.0" prefHeight="378.0" prefWidth="701.0">
+      <TableView fx:id="Lst_Quizes" layoutX="295.0" layoutY="47.0" prefHeight="370.0" prefWidth="810.0">
          <columns>
-            <TableColumn prefWidth="107.19998168945312" text="Quiz No" />
-            <TableColumn prefWidth="184.26669311523438" text="Name" />
-            <TableColumn minWidth="2.13330078125" prefWidth="117.59991455078125" text="Type" />
-            <TableColumn prefWidth="84.53326416015625" text="Due" />
-            <TableColumn prefWidth="89.0667724609375" text="Marks" />
-            <TableColumn prefWidth="116.79995117187502" text="Status" />
+            <TableColumn fx:id="colQuizNo" prefWidth="51.999969482421875" text="Quiz No" />
+            <TableColumn fx:id="colName" prefWidth="196.79998779296875" text="Name" />
+            <TableColumn fx:id="colType" minWidth="2.13330078125" prefWidth="120.0" text="Type" />
+            <TableColumn fx:id="colDue" prefWidth="154.4000244140625" text="Due" />
+            <TableColumn fx:id="colTotalMarks" prefWidth="87.20001220703125" text="Total_Marks" />
+            <TableColumn fx:id="colStatus" prefWidth="111.20013427734375" text="Status" />
+            <TableColumn fx:id="colMarksGiven" prefWidth="89.5999755859375" text="Marks_Given" />
          </columns>
       </TableView>
       <Button fx:id="Open_Quiz" layoutX="619.0" layoutY="449.0" mnemonicParsing="false" onMouseClicked="#handle_OpenQuiz" prefHeight="37.0" prefWidth="179.0" style="-fx-background-color: green;" text="Open Quiz" textFill="WHITE">

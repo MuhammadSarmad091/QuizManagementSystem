@@ -1,176 +1,188 @@
 package UserInterface;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
+import controllers.StudentHandler;
+import businessLayer.Answer;
+import businessLayer.Question;
+import businessLayer.Quiz;
+import businessLayer.Submission;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
-import javafx.scene.control.DatePicker;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 public class AttemptObjQuizController {
+    
+    private StudentHandler studentHandler;
+    private boolean editable;
+    private Map<Integer, String> selectedAnswers;
+
+    @FXML private ScrollPane CenteredScrollPane;
+    @FXML private Button Close;
+    @FXML private TextField StdName;
+    @FXML private TextField TotalMarks;
+    @FXML private Button Submit_Quiz;
+
+    /**
+     * Called to initialize this controller with data and editability.
+     */
+    public void initData(StudentHandler handler, boolean editable) {
+        this.studentHandler = handler;
+        this.editable = editable;
+        selectedAnswers = new HashMap<>();
+        // Show submit button only if editable
+        Submit_Quiz.setVisible(editable);
+        this.StdName.setText(this.studentHandler.getStudent().getUsername());
+        this.StdName.setEditable(false);
+        String your_marks= "?";
+        if(this.studentHandler.getCurrentSubmission().getStatus().equalsIgnoreCase("Graded"))
+        {
+        	your_marks = String.valueOf(this.studentHandler.getCurrentSubmission().getTotalMarksObtained());
+        }
+        this.TotalMarks.setText(your_marks + " / "+ String.valueOf(this.studentHandler.getCurrentQuiz().getTotalMarks()));
+        this.TotalMarks.setEditable(false);
+        loadQuiz();
+    }
 
     @FXML
-    private ScrollPane CenteredScrollPane;
+    public void initialize() {
 
-    @FXML
-    private Button Close;
-
-    @FXML
-    private TextField StdName;
-
-    @FXML
-    private DatePicker Submissiontime;
-
-    @FXML
-    private Button Submit_Quiz;
-
-    @FXML
-    private TextField TotalMarks;
+    }
 
     @FXML
     void handle_Close(MouseEvent event) {
-    	// and remaining
-    	Stage stage = (Stage) Close.getScene().getWindow();
-        stage.close();
-
+        if (editable) {
+            Alert confirm = new Alert(AlertType.CONFIRMATION,
+                "Are you sure leaving now will result in zero marks?");
+            confirm.setHeaderText(null);
+            Optional<ButtonType> result = confirm.showAndWait();
+            if (result.isPresent() && result.get() == ButtonType.OK) {
+                Stage stage = (Stage) Close.getScene().getWindow();
+                stage.close();
+            }
+        } else {
+            Stage stage = (Stage) Close.getScene().getWindow();
+            stage.close();
+        }
     }
 
     @FXML
     void handle_Submit_Quiz(MouseEvent event) {
-    	
-    	// get selected option
-//    	for (Map.Entry<Integer, String> entry : selectedAnswers.entrySet()) {
-//    	    System.out.println("Question " + entry.getKey() + ": " + entry.getValue());
-//    	}
-    	
-    	// and remaining
-    	Stage stage = (Stage) Close.getScene().getWindow();
+        Submission sub = studentHandler.getCurrentSubmission();
+        sub.getAnswers().clear();
+        Quiz quiz = studentHandler.getCurrentQuiz();
+        // Build answers and assign marks based on correctness (1 or 0)
+        selectedAnswers.forEach((qNo, ans) -> {
+            Answer a = new Answer();
+            a.setQuestionNumber(qNo);
+            a.setAnswer(ans);
+            quiz.getQuestions().stream()
+                .filter(q -> q.getQuestionNo() == qNo)
+                .findFirst()
+                .ifPresent(q -> {
+                    a.setMarksObtained(ans != null && ans.equals(q.getCorrectAnswer()) ? 1f : 0f);
+                });
+            sub.addAnswer(a);
+        });
+        sub.calculateTotalMarks();
+        sub.setStatus("Graded");
+        studentHandler.saveSubmission();
+        Stage stage = (Stage) Close.getScene().getWindow();
         stage.close();
-
-    }
-    
-    private HashMap<Integer, String> selectedAnswers;
-    private String status_quiz;
-    
-    //=============================================================
-    public void initialize(String StudentName , String StudentCode,String status_q) 
-	{
-    	selectedAnswers = new HashMap<>();
-		StdName.setText(StudentName);
-		status_quiz = status_q;
-		
-		loadQuiz(StudentName,StudentCode);
     }
 
-    private void loadQuiz(String studentName, String studentCode) {
-        ArrayList<String> questions = new ArrayList<>(Arrays.asList(
-            "Statement", "Option A", "Option B", "Option C", "Option D", "CorrectOption", "Marks", //total for unmarked and obtained for marked
-            "Statement2", "Option A", "Option B", "Option C", "Option D", "CorrectOption", "Marks",
-            "Statement3", "Option A", "Option B", "Option C", "Option D", "CorrectOption", "Marks",
-            "Statement4", "Option A", "Option B", "Option C", "Option D", "CorrectOption", "Marks"
-        ));
+    private void loadQuiz() {
+        Quiz quiz = studentHandler.getCurrentQuiz();
+        Submission sub = studentHandler.getCurrentSubmission();
+        if (quiz == null || sub == null) return;
 
-        VBox vbox = new VBox(10);
-        vbox.setStyle("-fx-padding: 10;");
+
+        VBox vbox = new VBox(15);
+        vbox.setStyle("-fx-padding: 15;");
         vbox.setAlignment(Pos.CENTER);
-        vbox.setMaxWidth(400);
+        vbox.setPrefWidth(600);
 
-        StackPane wrapperPane = new StackPane();
-        wrapperPane.setAlignment(Pos.CENTER);
-        wrapperPane.getChildren().add(vbox);
+        StackPane wrapper = new StackPane(vbox);
+        wrapper.setAlignment(Pos.CENTER);
 
-        for (int i = 0, qNum = 1; i < questions.size(); i += 7, qNum++) {
-            String statement = questions.get(i);
-            String optionA = questions.get(i + 1);
-            String optionB = questions.get(i + 2);
-            String optionC = questions.get(i + 3);
-            String optionD = questions.get(i + 4);
-            
-            String marks = questions.get(i + 6);
+        for (Question q : quiz.getQuestions()) {
+            int qNo = q.getQuestionNo();
+            VBox qBox = new VBox(10);
+            qBox.setStyle("-fx-border-color: black; -fx-padding: 15; -fx-border-radius: 5; -fx-background-color: white;");
+            qBox.setPrefWidth(550);
 
-            VBox questionBox = new VBox(5);
-            questionBox.setStyle("-fx-border-color: black; -fx-padding: 10; -fx-border-radius: 5; -fx-background-color: white;");
-            questionBox.setPrefWidth(500);
-            questionBox.setMaxWidth(500);
-            questionBox.setMinWidth(500);
+            Label stmt = new Label("Q" + qNo + ": " + q.getStatement());
+            stmt.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
 
-            Label statementLabel = new Label("Q" + qNum + ": " + statement);
-            statementLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
+            ToggleGroup group = new ToggleGroup();
+            RadioButton rbA = makeRadio(q.getOptA(), "A", group);
+            RadioButton rbB = makeRadio(q.getOptB(), "B", group);
+            RadioButton rbC = makeRadio(q.getOptC(), "C", group);
+            RadioButton rbD = makeRadio(q.getOptD(), "D", group);
 
-            ToggleGroup optionsGroup = new ToggleGroup();
+            // preselect from submission
+            sub.getAnswers().stream()
+               .filter(a -> a.getQuestionNumber() == qNo)
+               .findFirst().ifPresent(a -> {
+                   String choice = a.getAnswer();
+                   group.getToggles().stream()
+                        .filter(t -> t.getUserData().equals(choice))
+                        .findFirst()
+                        .ifPresent(t -> group.selectToggle(t));
+               });
 
-            RadioButton rbA = new RadioButton(optionA);
-            rbA.setToggleGroup(optionsGroup);
-            rbA.setUserData("A");
-
-            RadioButton rbB = new RadioButton(optionB);
-            rbB.setToggleGroup(optionsGroup);
-            rbB.setUserData("B");
-
-            RadioButton rbC = new RadioButton(optionC);
-            rbC.setToggleGroup(optionsGroup);
-            rbC.setUserData("C");
-
-            RadioButton rbD = new RadioButton(optionD);
-            rbD.setToggleGroup(optionsGroup);
-            rbD.setUserData("D");
-
-            // Save selection to global map on change
-            final int currentQuestion = qNum;
-            optionsGroup.selectedToggleProperty().addListener((obs, oldVal, newVal) -> {
-                if (newVal != null) {
-                    String selected = newVal.getUserData().toString();
-                    selectedAnswers.put(currentQuestion, selected);
-                } else {
-                    selectedAnswers.remove(currentQuestion);
-                }
-            });
-
-            
-            if (status_quiz == "Marked")
-            {
-            	String correctOption = questions.get(i + 5); // Don't show it here
-            	// Correct option
-            	
-          	     Label correctOptionLabel = new Label("Correct: " + correctOption);
-          	     correctOptionLabel.setStyle("-fx-text-fill: green;");
-                   
-                 VBox optionsBox = new VBox(5, rbA, rbB, rbC, rbD);
-
-                 Label marksLabel = new Label("Marks: " + marks);
-
-                 questionBox.getChildren().addAll(statementLabel, optionsBox,correctOptionLabel, marksLabel);
+            if (!editable) {
+                group.getToggles().forEach(t -> ((RadioButton)t).setDisable(true));
+            } else {
+                group.selectedToggleProperty().addListener((obs, oldT, newT) -> {
+                    if (newT != null) selectedAnswers.put(qNo, newT.getUserData().toString());
+                    else selectedAnswers.remove(qNo);
+                });
             }
-            else
-            {
-            	 VBox optionsBox = new VBox(5, rbA, rbB, rbC, rbD);
 
-                 Label marksLabel = new Label("Marks: " + marks);
+            VBox opts = new VBox(5, rbA, rbB, rbC, rbD);
+            Label marksLabel = new Label(String.format("Marks: %.1f", q.getMarks()));
+            qBox.getChildren().addAll(stmt, opts, marksLabel);
 
-                 questionBox.getChildren().addAll(statementLabel, optionsBox, marksLabel);
+            if ("Graded".equals(sub.getStatus())) {
+                Label corr = new Label("Correct: " + q.getCorrectAnswer());
+                corr.setStyle("-fx-text-fill: green;");
+                sub.getAnswers().stream()
+                  .filter(a -> a.getQuestionNumber() == qNo)
+                  .findFirst().ifPresent(a -> {
+                      Label your = new Label(String.format("Your marks: %.1f", a.getMarksObtained()));
+                      qBox.getChildren().add(your);
+                  });
+                qBox.getChildren().add(corr);
             }
-         
-            vbox.getChildren().add(questionBox);
+
+            vbox.getChildren().add(qBox);
         }
 
-        CenteredScrollPane.setContent(wrapperPane);
+        CenteredScrollPane.setContent(wrapper);
         CenteredScrollPane.setFitToWidth(true);
         CenteredScrollPane.setPannable(true);
     }
 
-
+    private RadioButton makeRadio(String text, String code, ToggleGroup grp) {
+        RadioButton rb = new RadioButton(text);
+        rb.setToggleGroup(grp);
+        rb.setUserData(code);
+        return rb;
+    }
 }

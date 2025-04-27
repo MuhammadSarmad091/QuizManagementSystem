@@ -1,5 +1,6 @@
 package controllers;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import businessLayer.*;
@@ -54,4 +55,36 @@ public class StudentHandler
 			return null;
 		return classDBH.getDBH().getClassesStudent(this.student.getUsername());
 	}
+	
+	 public List<Submission_Quiz> getSubmission_Quizzes()
+	 {
+		 return quizDBH.getDBH().getSubmission_Quizzes(this.student.getUsername(), this.currentClass.getClassCode());
+	 }
+	 
+	 public void startQuiz(int quizNo)
+	 {
+		 this.currentQuiz = quizDBH.getDBH().getQuiz(quizNo);
+		 this.currentSubmission = new Submission();
+		 this.currentSubmission.setQuizNo(quizNo);
+		 this.currentSubmission.setSubmissionDateTime(LocalDateTime.now());
+		 this.currentSubmission.setStatus("Not Graded");
+		 Student s = new Student();
+		 s.setUsername(this.getStudent().getUsername());
+		 this.currentSubmission.setStudent(s);
+		 int submNo = quizDBH.getDBH().initializeSubmission(currentSubmission);
+		 this.currentSubmission.setSubmissionNo(submNo);
+	 }
+	 
+	 public void viewSubmission(int quizNo)
+	 {
+		 this.currentQuiz = quizDBH.getDBH().getQuiz(quizNo);
+		 int submNo = quizDBH.getDBH().getSubmissionNo(quizNo, this.student.getUsername());
+		 this.currentSubmission = quizDBH.getDBH().getSubmission(submNo);	 
+	 }
+	 
+	 public void saveSubmission()
+	 {
+		 quizDBH.getDBH().saveSubmission(currentSubmission);
+	 }
+	
 }

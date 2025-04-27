@@ -8,6 +8,7 @@ import java.sql.Statement;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import businessLayer.Answer;
@@ -15,6 +16,7 @@ import businessLayer.Question;
 import businessLayer.Quiz;
 import businessLayer.Student;
 import businessLayer.Submission;
+import businessLayer.Submission_Quiz;
 
 public class quizDBH {
     private static quizDBH instance;
@@ -272,7 +274,7 @@ public class quizDBH {
             
             if (!exists) {
                 // For demonstration, assume quizNo is available. If not, modify Submission to include quizNo.
-                int quizNo = 1; // TODO: Replace with s.getQuizNo() if available.
+                int quizNo = s.getQuizNo(); // TODO: Replace with s.getQuizNo() if available.
                 String insertSql = "INSERT INTO Submission (quizNo, studentUserName, submissionDateTime, submissionStatus, totalMarksObtained) VALUES (?, ?, GETDATE(), ?, ?)";
                 PreparedStatement insertPs = conn.prepareStatement(insertSql);
                 insertPs.setInt(1, quizNo);
@@ -427,5 +429,147 @@ public class quizDBH {
 
         return quiz;
     }
+    
+    public List<Submission_Quiz> getSubmission_Quizzes(String studentUsername, String classCode) {
+        List<Submission_Quiz> result = new ArrayList<>();
+        String sql =
+          "SELECT q.quizNo, q.quizName, q.quizType, q.deadLine, q.totalMarks,\n" +
+          "       s.submissionStatus, s.totalMarksObtained\n" +
+          "  FROM Quiz q\n" +
+          "  LEFT JOIN Submission s\n" +
+          "    ON q.quizNo = s.quizNo\n" +
+          "   AND s.studentUserName = ?\n" +
+          " WHERE q.classCode = ?";
+        try (Connection conn = dbManager.connect();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, studentUsername);
+            ps.setString(2, classCode);
+            try (ResultSet rs = ps.executeQuery()) {
+                Date now = new Date();
+                while (rs.next()) {
+                    int quizNo      = rs.getInt("quizNo");
+                    String name     = rs.getString("quizName");
+                    String type     = rs.getString("quizType");
+                    Date due        = new Date(rs.getTimestamp("deadLine").getTime());
+                    int totalMarks  = Math.round(rs.getFloat("totalMarks"));
+                    String subStatus = rs.getString("submissionStatus");
+                    // may be NULL if no submission
+                    Float subMarks = rs.getObject("totalMarksObtained") != null
+                                     ? rs.getFloat("totalMarksObtained")
+                                     : null;
+
+                    Integer marksGiven;
+                    String status;
+                    if (subStatus != null) {
+                        // there is a submission row
+                        status     = subStatus;
+                        marksGiven = Math.round(subMarks);
+                    } else {
+                        // no submission row
+                        if (!now.after(due)) {
+                            status     = "Assigned";
+                            marksGiven = 0;
+                        } else {
+                            status     = "Missing";
+                            marksGiven = 0;
+                        }
+                    }
+
+                    Submission_Quiz sq = new Submission_Quiz(
+                        quizNo,
+                        name,
+                        type,
+                        due,
+                        totalMarks,
+                        marksGiven,
+                        status
+                    );
+                    result.add(sq);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+    
+    public int getSubmissionNo(int quizNo, String studentUsername) {
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+
+        try {
+            conn = dbManager.connect();
+            String query = "SELECT submissionNo FROM Submission WHERE quizNo = ? AND studentUserName = ?";
+            stmt = conn.prepareStatement(query);
+            stmt.setInt(1, quizNo);
+            stmt.setString(2, studentUsername);
+            rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                return rs.getInt("submissionNo");
+            } else {
+                return 0;
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return 0;
+        } finally {
+            try {
+                if (rs != null) rs.close();
+                if (stmt != null) stmt.close();
+                if (conn != null) conn.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public int initializeSubmission(Submission s) {
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        int submissionNo = 0;
+
+        try {
+            conn = dbManager.connect();
+
+            String insertQuery = "INSERT INTO Submission (quizNo, studentUserName, submissionDateTime, submissionStatus, totalMarksObtained) " +
+                                 "VALUES (?, ?, ?, ?, ?)";
+            stmt = conn.prepareStatement(insertQuery, Statement.RETURN_GENERATED_KEYS);
+            stmt.setInt(1, s.getQuizNo());
+            stmt.setString(2, s.getStudent().getUsername());
+            stmt.setTimestamp(3, Timestamp.valueOf(s.getSubmissionDateTime()));
+            stmt.setString(4, s.getStatus());
+            stmt.setFloat(5, s.getTotalMarksObtained());
+
+            int affectedRows = stmt.executeUpdate();
+            if (affectedRows == 0) {
+                throw new SQLException("Creating submission failed, no rows affected.");
+            }
+
+            rs = stmt.getGeneratedKeys();
+            if (rs.next()) {
+                submissionNo = rs.getInt(1);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (rs != null) rs.close();
+                if (stmt != null) stmt.close();
+                if (conn != null) conn.close();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+        }
+
+        return submissionNo;
+    }
+
+
 
 }
